@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>English Duel</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;800&family=Instrument+Sans:wght@400;600&display=swap">
+<style>
+:root{color-scheme:dark;--bg:#10202a;--panel:#183341;--ink:#f1f5f2;--mute:#8fa9b5;--p1:#f4b942;--p2:#5ec4e8;--ok:#6fdc8c;--bad:#ff6b6b;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*,*::before,*::after{box-sizing:inherit}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);font-family:"Instrument Sans",system-ui,sans-serif}
+h1,h2,.q{font-family:"Bricolage Grotesque","Instrument Sans",system-ui,sans-serif}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+.screen{max-width:960px;margin:0 auto;padding:20px 16px 32px;min-height:100vh}
+.hidden{display:none!important}
+/* start */
+#start{display:flex;flex-direction:column;justify-content:center;gap:22px}
+#start h1{font-size:clamp(3rem,13vw,6.5rem);line-height:.9;margin:0;font-weight:800;letter-spacing:-.03em}
+#start h1 span{display:block}
+#start h1 .a{color:var(--p1)}#start h1 .b{color:var(--p2)}
+#start p{color:var(--mute);margin:0;max-width:46ch;line-height:1.5}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+label{display:flex;flex-direction:column;gap:6px;font-size:.9rem;color:var(--mute)}
+input{background:var(--panel);border:2px solid transparent;border-radius:10px;padding:12px;color:var(--ink);font:inherit;font-size:1.05rem}
+#n1{border-color:var(--p1)}#n2{border-color:var(--p2)}
+.seg{display:flex;gap:8px}
+.seg button{flex:1;background:var(--panel);border:2px solid transparent;border-radius:10px;padding:10px}
+.seg button[aria-pressed=true]{border-color:var(--ink)}
+.go{background:var(--ink);color:var(--bg);border:0;border-radius:12px;padding:16px;font-weight:800;font-size:1.2rem;font-family:"Bricolage Grotesque",sans-serif}
+.keys{font-size:.85rem;color:var(--mute)}
+kbd{background:var(--panel);border-radius:5px;padding:1px 7px;color:var(--ink);font-family:inherit}
+/* game */
+#game{display:flex;flex-direction:column;gap:14px}
+.top{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:center}
+.pl{display:flex;flex-direction:column;gap:6px}
+.pl.r{align-items:flex-end}
+.pl b{font-family:"Bricolage Grotesque",sans-serif;font-size:1.1rem}
+.pl.l b{color:var(--p1)}.pl.r b{color:var(--p2)}
+.hp{display:flex;gap:4px}
+.hp i{width:22px;height:10px;border-radius:3px;background:currentColor;transition:opacity .3s,transform .3s}
+.pl.l .hp{color:var(--p1)}.pl.r .hp{color:var(--p2)}
+.hp i.off{opacity:.15;transform:scaleY(.5)}
+.rnd{color:var(--mute);font-size:.9rem;text-align:center}
+.timer{height:6px;background:var(--panel);border-radius:3px;overflow:hidden}
+.timer div{height:100%;width:100%;background:var(--ink);transition:width .1s linear}
+.card{background:var(--panel);border-radius:18px;padding:clamp(18px,4vw,34px);text-align:center;min-height:130px;display:flex;flex-direction:column;justify-content:center;gap:8px}
+.card small{color:var(--mute)}
+.q{font-size:clamp(1.4rem,4.6vw,2.4rem);font-weight:500;line-height:1.2;margin:0}
+.fb{min-height:1.4em;font-weight:600}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.col{display:flex;flex-direction:column;gap:10px;padding:10px;border-radius:16px;border:2px solid transparent;transition:opacity .2s}
+.col.l{border-color:color-mix(in srgb,var(--p1) 45%,transparent)}
+.col.r{border-color:color-mix(in srgb,var(--p2) 45%,transparent)}
+.col.lock{opacity:.4}
+.opt{display:flex;align-items:center;gap:10px;background:var(--panel);border:2px solid transparent;border-radius:12px;padding:14px 12px;text-align:left;font-size:1.05rem;min-height:54px}
+.opt kbd{flex:none;min-width:26px;text-align:center}
+.col.l .opt kbd{background:var(--p1);color:#10202a}
+.col.r .opt kbd{background:var(--p2);color:#10202a}
+.opt.ok{background:var(--ok);color:#10202a}
+.opt.bad{background:var(--bad);color:#10202a}
+.opt:disabled{cursor:default}
+.shake{animation:sh .35s}
+@keyframes sh{25%{transform:translateX(-7px)}75%{transform:translateX(7px)}}
+/* end */
+#end{display:flex;flex-direction:column;justify-content:center;align-items:flex-start;gap:18px}
+#end h2{font-size:clamp(2.4rem,10vw,5rem);margin:0;line-height:1}
+#end p{color:var(--mute);margin:0}
+@media(max-width:560px){.opt{font-size:.95rem;padding:12px 8px}.hp i{width:16px}.cols{gap:8px}.col{padding:6px}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<main>
+<section id="start" class="screen">
+  <h1><span class="a">English</span><span class="b">Duel</span></h1>
+  <p>Ikki kishilik duel: bitta ekran, bitta savol. Kim to‘g‘ri javobni birinchi bosadi, raqibining joniga zarba tushadi. Xato bossangiz, shu savolda bloklanasiz.</p>
+  <div class="row">
+    <label>1-o‘yinchi<input id="n1" value="Aziz" maxlength="14"></label>
+    <label>2-o‘yinchi<input id="n2" value="Malika" maxlength="14"></label>
+  </div>
+  <label>Jon soni
+    <div class="seg" id="hpSel"><button aria-pressed="false" data-v="3">3</button><button aria-pressed="true" data-v="5">5</button><button aria-pressed="false" data-v="7">7</button></div>
+  </label>
+  <p class="keys">1-o‘yinchi: <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> <kbd>F</kbd> &nbsp; 2-o‘yinchi: <kbd>J</kbd> <kbd>K</kbd> <kbd>L</kbd> <kbd>;</kbd> &nbsp; Telefonda o‘z tomoningizni bosing.</p>
+  <button class="go" id="startBtn">Duelni boshlash</button>
+</section>
+
+<section id="game" class="screen hidden">
+  <div class="top">
+    <div class="pl l"><b id="t1"></b><div class="hp" id="hp1"></div></div>
+    <div class="rnd" id="rnd"></div>
+    <div class="pl r"><b id="t2"></b><div class="hp" id="hp2"></div></div>
+  </div>
+  <div class="timer"><div id="bar"></div></div>
+  <div class="card" id="card"><small id="cat"></small><p class="q" id="q"></p><div class="fb" id="fb"></div></div>
+  <div class="cols">
+    <div class="col l" id="c1"></div>
+    <div class="col r" id="c2"></div>
+  </div>
+</section>
+
+<section id="end" class="screen hidden">
+  <h2 id="win"></h2>
+  <p id="sum"></p>
+  <button class="go" id="again">Qayta o‘ynash</button>
+</section>
+</main>
+
+<script>
+const BANK=[
+["She ___ to school every day.","goes","go","going","gone"],
+["If I ___ rich, I would travel the world.","were","am","will be","been"],
+["He has lived here ___ 2015.","since","for","from","during"],
+["Synonym of “enormous”","huge","tiny","narrow","quiet"],
+["I’m looking forward ___ you.","to seeing","to see","for seeing","seeing"],
+["They ___ dinner when I arrived.","were having","was having","are having","have had"],
+["Opposite of “ancient”","modern","old","historic","rusty"],
+["You ___ smoke here. It’s forbidden.","mustn’t","don’t have to","may","can"],
+["She is the ___ student in class.","smartest","most smart","smarter","more smart"],
+["I have never ___ sushi.","eaten","ate","eat","eating"],
+["“Give up” means","stop trying","start","continue","win"],
+["Don’t forget to turn ___ the lights.","off","of","out of","away"],
+["We ___ English for two years.","have been studying","are study","studies","will studied"],
+["The book ___ by millions of people.","was read","read","was reading","has reading"],
+["He asked me where ___.","I lived","did I live","do I live","I do live"],
+["___ going to be late.","They’re","Their","There","Theirs"],
+["How ___ people came to the party?","many","much","a lot","few of"],
+["I’m afraid ___ spiders.","of","from","for","about"],
+["Synonym of “begin”","start","finish","stop","delay"],
+["She suggested ___ to the cinema.","going","to go","go","went"],
+["By next year, I ___ my degree.","will have finished","will finish","finished","have finished"],
+["“Break a leg!” means","good luck","be careful","run fast","get hurt"],
+["Neither of them ___ the answer.","knows","know","are knowing","knowing"],
+["He is allergic ___ nuts.","to","with","of","at"],
+["Opposite of “generous”","stingy","kind","polite","rich"],
+["I wish I ___ more time.","had","have","has","will have"],
+["___ you ever been to London?","Have","Did","Are","Do"],
+["She’s good ___ playing chess.","at","in","on","for"],
+["“Hit the books” means","study hard","fight","buy books","read slowly"],
+["Unless you hurry, you ___ the bus.","will miss","miss","would missed","missing"],
+["A person who writes books is an ___.","author","actor","doctor","driver"],
+["I’d rather ___ at home tonight.","stay","to stay","staying","stayed"],
+["The weather is ___ than yesterday.","worse","more bad","badder","worst"],
+["He ___ TV when the phone rang.","was watching","watched","watches","has watched"],
+["She doesn’t have ___ money.","any","some","many","a"],
+["“Piece of cake” means","very easy","dessert","expensive","dangerous"],
+["I look forward to ___ from you.","hearing","hear","heard","be hearing"],
+["Synonym of “rapid”","quick","slow","heavy","late"],
+["He apologized ___ being late.","for","of","about","to"],
+["The meeting was put ___ until Friday.","off","out","away","up"]
+];
+const KEYS=[["a","s","d","f"],["j","k","l",";"]];
+const $=id=>document.getElementById(id);
+let maxHp=5,hp=[5,5],names=["",""],queue=[],cur=null,opts=[],locked=[false,false],open=false,t0=0,tick=null,round=0,wins=[0,0];
+const TIME=12000;
+
+document.querySelectorAll("#hpSel button").forEach(b=>b.onclick=()=>{
+  document.querySelectorAll("#hpSel button").forEach(x=>x.setAttribute("aria-pressed","false"));
+  b.setAttribute("aria-pressed","true");maxHp=+b.dataset.v;
+});
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
+const show=id=>{["start","game","end"].forEach(s=>$(s).classList.toggle("hidden",s!==id))};
+
+function drawHp(){[0,1].forEach(p=>{$("hp"+(p+1)).innerHTML=Array.from({length:maxHp},(_,i)=>`<i class="${i<hp[p]?"":"off"}"></i>`).join("")})}
+
+function begin(){
+  names=[$("n1").value.trim()||"1-o‘yinchi",$("n2").value.trim()||"2-o‘yinchi"];
+  hp=[maxHp,maxHp];queue=shuffle(BANK);round=0;wins=[0,0];
+  $("t1").textContent=names[0];$("t2").textContent=names[1];
+  drawHp();show("game");next();
+}
+
+function next(){
+  if(!queue.length)queue=shuffle(BANK);
+  cur=queue.pop();round++;
+  const correct=cur[1];
+  opts=shuffle(cur.slice(1)).map(t=>({t,ok:t===correct}));
+  locked=[false,false];open=true;
+  $("cat").textContent=round+"-raund";$("q").textContent=cur[0];$("fb").textContent="";
+  $("rnd").textContent="";
+  [0,1].forEach(p=>{
+    const c=$("c"+(p+1));c.classList.remove("lock");
+    c.innerHTML=opts.map((o,i)=>`<button class="opt" data-p="${p}" data-i="${i}"><kbd>${KEYS[p][i].toUpperCase()}</kbd><span>${o.t}</span></button>`).join("");
+  });
+  document.querySelectorAll(".opt").forEach(b=>b.onclick=()=>answer(+b.dataset.p,+b.dataset.i));
+  t0=performance.now();clearInterval(tick);
+  tick=setInterval(()=>{
+    const left=Math.max(0,1-(performance.now()-t0)/TIME);
+    $("bar").style.width=left*100+"%";
+    if(left<=0&&open){open=false;reveal();say("Vaqt tugadi. Zarba yo‘q.");later()}
+  },100);
+}
+
+function btn(p,i){return $("c"+(p+1)).children[i]}
+function reveal(){clearInterval(tick);
+  opts.forEach((o,i)=>{if(o.ok)[0,1].forEach(p=>btn(p,i).classList.add("ok"))});
+  document.querySelectorAll(".opt").forEach(b=>b.disabled=true);
+}
+function say(t){$("fb").textContent=t}
+function later(){setTimeout(()=>{if(hp[0]>0&&hp[1]>0)next()},1400)}
+
+function answer(p,i){
+  if(!open||locked[p])return;
+  if(opts[i].ok){
+    open=false;reveal();
+    const q=1-p;hp[q]--;wins[p]++;drawHp();
+    say(names[p]+" birinchi topdi. "+names[q]+" jon yo‘qotdi.");
+    $("c"+(q+1)).classList.add("shake");setTimeout(()=>$("c"+(q+1)).classList.remove("shake"),400);
+    if(hp[q]<=0){setTimeout(()=>finish(p),1300);return}
+    later();
+  }else{
+    locked[p]=true;btn(p,i).classList.add("bad");
+    [...$("c"+(p+1)).children].forEach(b=>b.disabled=true);
+    $("c"+(p+1)).classList.add("lock");
+    if(locked[0]&&locked[1]){open=false;reveal();say("Ikkalangiz ham xato qildingiz.");later()}
+  }
+}
+
+function finish(p){
+  clearInterval(tick);show("end");
+  $("win").textContent=names[p]+" g‘olib!";
+  $("sum").textContent=`Hisob: ${names[0]} ${wins[0]} – ${wins[1]} ${names[1]}. Qolgan jon: ${hp[p]}.`;
+}
+
+document.addEventListener("keydown",e=>{
+  if(e.target.tagName==="INPUT")return;
+  const k=e.key.toLowerCase();
+  [0,1].forEach(p=>{const i=KEYS[p].indexOf(k);if(i>-1&&!$("game").classList.contains("hidden"))answer(p,i)});
+});
+$("startBtn").onclick=begin;$("again").onclick=()=>show("start");
+</script>
+</body>
+</html>
